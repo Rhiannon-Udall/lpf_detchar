@@ -8,8 +8,7 @@ build-backend = "setuptools.build_meta"
 
 [tool.setuptools.packages.find]
 where = ["src"] 
-include = ["my_python_package*"]
-namespaces = false
+namespaces = true
 
 [tool.setuptools_scm]
 write_to = "src/my_python_package/_version.py"
