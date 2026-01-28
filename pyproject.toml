@@ -13,10 +13,13 @@ namespaces = true
 [tool.setuptools_scm]
 write_to = "src/my_python_package/_version.py"
 
+[tool.setuptools.dynamic]
+version = {attr = "my_python_package._version.__version__"}
+
 [project]
 name = "my-python-package"
 authors = [
-  { name="Albert Einstein", email="albert.einstein@ligo.org" },
+  { name="Rhiannon Udall", email="rhiannon.udall@ligo.org" },
 ]
 description = "A template for how to build your own python package, with opinionated choices for configuration"
 readme = "README.md"
@@ -37,10 +40,7 @@ dependencies = [
 [project.scripts]
 template_python_project_hello = "my_python_package:cli_hello"
 
-[tool.setuptools.dynamic]
-version = {attr = "my_python_package._version.__version__"}
-
 
 [project.urls]
-"Homepage" = "https://github.com/Rhiannon-Udall/python-package-template"
-"Bug Tracker" = "https://github.com/Rhiannon-Udall/python-package-template/issues"
+homepage = "https://github.com/Rhiannon-Udall/python-package-template"
+issues = "https://github.com/Rhiannon-Udall/python-package-template/issues"
