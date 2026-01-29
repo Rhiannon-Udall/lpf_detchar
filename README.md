@@ -71,21 +71,8 @@ Next is a one liner:
 [tool.setuptools_scm]
 write_to = "src/my_python_package/_version.py"
 ```
-`setuptools_scm` handles the version control automatically, so we just need to point it to where the packages version file will get written.
+`setuptools_scm` handles the version control automatically base on `git` tags, so we just need to point it to where the packages version file will get written.
 Substitute `my_python_package` for your own package name, but otherwise not much to do here. 
-
-However, this is a good moment for a digression about how version control works with this setup, so read the collapsed section below when you are ready to make a tagged release version.
-
-<details>
-  <summary><b>How to make tagged versions</b></summary>
-
-  `setuptools_scm` uses `git` tags to automaticallly generate the version of the package.
-  The basic system is that it will look at the most recent `git tag` and use this as the base version.
-  If the code has been modified since that tag, it will then add a `dev...` hash to the version name, to note that this is a development version under some git hash.
-  When you're ready to make a release version, you make a new [git tag](https://git-scm.com/book/en/v2/Git-Basics-Tagging).
-  The simple command will look something like this: `git tag -a v0.2.0 -m "Release version 0.2.0"` where `-a` is the version name you are making (make sure to follow [pep 440](https://peps.python.org/pep-0440/) if you want to upload to pypi) and `-m` is a message to apply to the git tag.
-
-</details>
 
 ### `tool.setuptools.dynamic`
 
@@ -159,7 +146,26 @@ issues = "https://github.com/Rhiannon-Udall/python-package-template/issues"
 ```
 
 ## Deployment
-TODO
+
+If you wish to deploy your package, such that others can easily access it (rather than having to clone your repository), you will want to put it on `pypi`.
+The first step for this is to build a release version.
+That requires, in turn, creating a release version of your git repository. 
+
+As previously mentioned, `setuptools_scm` uses `git` tags to automaticallly generate the version of the package.
+The basic system is that it will look at the most recent `git tag` and use this as the base version.
+If the code has been modified since that tag, it will then add a `dev...` hash to the version name, to note that this is a development version under some git hash.
+When you're ready to make a release version, you make a new [git tag](https://git-scm.com/book/en/v2/Git-Basics-Tagging).
+The simple command will look something like this: `git tag -a v0.2.0 -m "Release version 0.2.0"` where `-a` is the version name you are making (make sure to follow [pep 440](https://peps.python.org/pep-0440/) if you want to upload to pypi) and `-m` is a message to apply to the git tag.
+
+Once you have a tagged version, you need to follow [the pypi instructions for building and deploying your project](https://packaging.python.org/en/latest/tutorials/packaging-projects/).
+To be completely honest, I reference these instructions every time I am doing `pypi` upload, so I would generally suggest you do the same.
+For completeness, however, here are the basic steps.
+
+1) Install/upgrade `twine` and `build`
+2) Build your project by running `python3 -m build` in the project directory
+3) Upload your project by running `python3 -m twine upload dist/*-{version}*`, where `{version}` is the version you build (e.g. `v0.2.0`). 
+
+This will prompt you for your API token, for which you will need to create an account, see information [here](https://pypi.org/help/#apitoken).
 
 # Formatting and Pre-commit
 
@@ -364,7 +370,8 @@ To see what this looks like we can do:
 ```
 
 As you can see, the function has been converted into a command line script.
-Note that the information on `name`in the `Arguments` is derived from the annotation we added. 
+Note that the information on `name`in the `Arguments` is derived from the annotation we added.
+`typer` can also do other cool stuff, for which you should visit [the package documentation](https://typer.tiangolo.com/) if you are interested.
 
 If the script is provided an input it will do what you'd expect:
 ```bash
