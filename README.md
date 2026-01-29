@@ -53,7 +53,16 @@ namespaces = true
 ```
 This section is important because it is what tells setuptools where your source code actually lives.
 The construction here is that there is a source directory (`src`), and the source code lives within it under the package namespace `my_python_package`. 
-This should work for simple cases, but note that if you want to start adding more directories in `src` without having them built as a package, you need to set `namespaces` to `false`, then add `include = ["my_python_package"]`. 
+
+An alternate way to set this up looks like this:
+```toml
+[tool.setuptools.packages.find]
+where = ["src"] 
+namespaces = false
+include = ["my_python_package"]
+```
+Which will only install `my_python_package`, instead of searching on its own.
+This is useful if you have multiple directories in `src` and do not want them all built, but note that if you take this option then you will need to change the `include` bit to your package name as appropriate. 
 
 ### `tool.setuptools_scm`
 
@@ -262,9 +271,13 @@ We'll see an application of this in the code below.
 Another thing you'll commonly want to do is write command line scripts.
 These are scripts that you call from terminal in order to do something.
 Usually, you'll want to put in some inputs at the time you call it, in order to customize the behavior, and for this you'll need a parser.
+These are wrappers around a script which take command line inputs, then make them variables in your python code which can be operated upon.
+The simplest way to do this is to call `sys.argv` and hope that the user a) knew what arguments to put in and b) knew what the correct order to put them in was.
+**Please do not take this approach, as it makes code extremely difficult to read and use**.
+Instead, various modules allow you to build more advanced parsers, which provide the user with more information and make your code more readable. 
 
 The most common parser to use for this purpose is the built-in [`argparse`](https://docs.python.org/3/library/argparse.html).
-I'm going to suggest a different route, however, and instead introduce `typer`. 
+I'm going to suggest a different route, however, and instead introduce `typer`, which helps you avoid having to write a parser at all. 
 
 <details>
   <summary><b>Opinionated Suggestion #4</b></summary>
@@ -315,14 +328,55 @@ def cli_hello():
 ```
 
 Here `hello` is a very simple function, but thoroughly documented:
+
 - The input and output types are specified
-- `typer.Argument` is used to add a help message explaining `name`
 - Docstrings also explain inputs and outputs, as well as the purpose of the code.
+- `typer.Argument` is used to add a help message explaining `name`
 
-Producing the client script is then as simple as making a new function which calls `typer.run` on the function.
-If this were being run as `__main__` that could be skipped, but we want to use this as a client script accessed by setuptools.
+You are likely already familiar with most of these points (TODO link to previous tutorials about this), except the bit about `typer`, which I will now explain.
 
-To make this accessible, it's convenient to also import it at the module level by adding it to the `__init__.py`:
+The command `typer.run()` takes in a function, constructs a command line parser from the function signature (that is, the combination of its inputs, outputs, typing, and docstrings), then feeds the user inputs to that parser into the function.
+The function name `cli_hello` conveys that this function is a command line (client, hence `cli`) wrapper of `hello`, but this is just a convention and need not be adapted. 
+To see what this looks like we can do:
+```bash
+(better-bilby-pipe-development) [rhiannon.udall@citlogin1 RandomSourceLibraries]$ template_python_project_hello --help
+                                                                                                                        
+ Usage: template_python_project_hello [OPTIONS] NAME                                                                    
+                                                                                                                        
+ Says hello to {name}                                                                                                   
+                                                                                                                        
+ Parameters                                                                                                             
+ ==========                                                                                                             
+     name : str                                                                                                         
+         The name of the person to say hello to                                                                         
+                                                                                                                        
+ Returns                                                                                                                
+ =======                                                                                                                
+     str                                                                                                                
+         The message to send (also sent to stdout via the logger)                                                       
+                                                                                                                        
+╭─ Arguments ──────────────────────────────────────────────────────────────────────────────────────────────────────────╮
+│ *    name      TEXT  The name of the person to say hello to [required]                                               │
+╰──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
+╭─ Options ────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
+│ --help          Show this message and exit.                                                                          │
+╰──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+```
+
+As you can see, the function has been converted into a command line script.
+Note that the information on `name`in the `Arguments` is derived from the annotation we added. 
+
+If the script is provided an input it will do what you'd expect:
+```bash
+
+(better-bilby-pipe-development) [rhiannon.udall@citlogin1 RandomSourceLibraries]$ template_python_project_hello rhiannon.udall
+|MY-PYTHON-PACKAGE|29/01 13:09:38|INFO| Hello rhiannon.udall, this is an example python script! 
+```
+
+Now you probably noticed that the script name was not `cli_hello`, but instead `template_python_project_hello`.
+Recall that this was what we set in the `pyproject.toml`: `template_python_project_hello = "my_python_package:cli_hello"`.
+Now, this assumes that we could do `from my_python_package import cli_hello`, which is not presently true.
+To make this accessible, we can import it at the module level by adding it to the `__init__.py`:
 
 ```python
 from . import hello, logging
@@ -332,9 +386,7 @@ from .hello import cli_hello
 __all__ = ["hello", "logging", "cli_hello"]
 ```
 
-This means you could do `from my_python_package import cli_hello`, which is not particularly useful in python but is what `setuptools` needs. 
-
-This is where it is then referenced in [`project.scripts`](###project.scripts), which sets the name of the script that just runs this function. 
+Here the `__all__` bit is not necessary for the code to run, but `ruff` will yell at you if you don't add it. 
 
 
 # Documentation
