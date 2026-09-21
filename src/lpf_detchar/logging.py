@@ -8,7 +8,9 @@ from loguru import logger
 
 logger.remove(0)
 
-logger_format = "|<blue>MY-PYTHON-PACKAGE</blue>|{time:DD/MM HH:mm:ss}|{level}| <green>{message}</green> "
+logger_format = (
+    "|<blue>LPF-DETCHAR</blue>|{time:DD/MM HH:mm:ss}|{level}| <green>{message}</green> "
+)
 
 logger.add(
     sys.stderr,

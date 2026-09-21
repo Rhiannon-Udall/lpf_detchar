@@ -11,17 +11,17 @@ where = ["src"]
 namespaces = true
 
 [tool.setuptools_scm]
-write_to = "src/my_python_package/_version.py"
+write_to = "src/lpf_detchar/_version.py"
 
 [tool.setuptools.dynamic]
-version = {attr = "my_python_package._version.__version__"}
+version = {attr = "lpf_detchar._version.__version__"}
 
 [project]
-name = "my-python-package"
+name = "lpf_detchar"
 authors = [
   { name="Rhiannon Udall", email="rhiannon.udall@ligo.org" },
 ]
-description = "A template for how to build your own python package, with opinionated choices for configuration"
+description = "Tools for detchar investigations of LISA pathfinder data"
 readme = "README.md"
 requires-python = ">=3.10"
 classifiers = [
@@ -34,11 +34,15 @@ classifiers = [
 dynamic = ["version"]
 dependencies = [
     "loguru",
-    "typer"
+    "typer",
+    "pydantic",
+    "pydantic_yaml",
+    "jax",
+    "scikit-learn",
+    "h5py"
 ]
 
 [project.scripts]
-template_python_project_hello = "my_python_package:cli_hello"
 
 
 [project.urls]
