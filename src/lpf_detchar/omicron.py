@@ -227,7 +227,7 @@ def frequency_domain_omicron_windows(
     )
     return windows
 
-
+@jax.jit
 def get_energy_in_tiles_time_domain_data(
     time_domain_data: jnp.ndarray,
     frequency_mask: jnp.ndarray,
@@ -262,10 +262,10 @@ def get_energy_in_tiles_time_domain_data(
     # Time tiles are shape (P,)
     frequency_array = jnp.linspace(
         0, sampling_frequency / 2, len(time_domain_data) // 2 + 1
-    )[frequency_mask]
+    )
     duration = 1 / (frequency_array[1] - frequency_array[0])
     frequency_domain_data = (
-        jnp.fft.rfft(time_domain_data)[frequency_mask]
+        jnp.fft.rfft(time_domain_data)
         / sampling_frequency
         / jnp.sqrt(duration)
     )
